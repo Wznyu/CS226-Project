@@ -1,4 +1,4 @@
-package edu.ucr.cs.cs226.GameScout;
+package edu.ucr.cs.cs226.GameScout.controller;
 
 
 import org.apache.spark.api.java.JavaRDD;

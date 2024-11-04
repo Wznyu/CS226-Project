@@ -3,37 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Page</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Game Search</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .result { margin: 10px 0; }
+    </style>
 </head>
 <body>
-<header>
-    <h1>Welcome to the Test Page</h1>
-</header>
-<main>
-    <section>
-        <h2>About This Page</h2>
-        <p>This page fetches data from the Spark context.</p>
-    </section>
-    <section>
-        <h2>Spark Data</h2>
-        <p id="spark-data">Loading...</p>
-    </section>
-</main>
-<footer>
-    <p>&copy; 2024 Test Page</p>
-</footer>
+<h1>Search Games</h1>
+<input type="text" id="keyword" placeholder="Enter a keyword" />
+<button onclick="searchGames('GET')">Search with GET</button>
+<button onclick="searchGames('POST')">Search with POST</button>
+<div id="results"></div>
 
 <script>
-        fetch('/spark-data')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('spark-data').textContent = data;
-            })
-            .catch(error => {
-                document.getElementById('spark-data').textContent = 'Error fetching data';
-                console.error('Error:', error);
+        function searchGames(method) {
+            const keyword = document.getElementById('keyword').value;
+            const url = `/api/games/search?keyword=${encodeURIComponent(keyword)}`;
+
+            if (method === 'GET') {
+                // Send a GET request
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => displayResults(data))
+                    .catch(error => console.error('Error with GET request:', error));
+            } else if (method === 'POST') {
+                // Send a POST request
+                fetch('/api/games/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ keyword: keyword })
+                })
+                    .then(response => response.json())
+                    .then(data => displayResults(data))
+                    .catch(error => console.error('Error with POST request:', error));
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ''; // Clear previous results
+
+            if (data.length === 0) {
+                resultsDiv.innerHTML = '<p>No results found.</p>';
+                return;
+            }
+
+            data.forEach(game => {
+                const gameDiv = document.createElement('div');
+                gameDiv.className = 'result';
+                gameDiv.innerHTML = `
+                    <h3>${game.name}</h3>
+                    <p>Release Date: ${game.releaseDate}</p>
+                    <p>Developer: ${game.developer}</p>
+                    <p>Description: ${game.longDescription}</p>
+                `;
+                resultsDiv.appendChild(gameDiv);
             });
+        }
     </script>
 </body>
 </html>
