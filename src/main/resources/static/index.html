@@ -56,9 +56,9 @@
                 gameDiv.className = 'result';
                 gameDiv.innerHTML = `
                     <h3>${game.name}</h3>
-                    <p>Release Date: ${game.releaseDate}</p>
-                    <p>Developer: ${game.developer}</p>
-                    <p>Description: ${game.longDescription}</p>
+                    <p>Release Date: ${game.release_date}</p>
+                    <p>Reviews: ${game.number_of_english_reviews}</p>
+                    <p>Description: ${game.short_escription}</p>
                 `;
                 resultsDiv.appendChild(gameDiv);
             });

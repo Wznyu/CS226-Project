@@ -29,7 +29,7 @@ public class SparkService {
     private void loadData() {
         gameDescriptions = sparkSession.read()
                 .option("header","true")
-                .csv("/Users/stephenhuang/IdeaProjects/CS226/GameScout/src/main/resources/data/games_description.csv");
+                .csv("src/main/resources/data/games_description.csv");
     }
 
     public List<Game> findGamebyKeywords(String keyword) {
