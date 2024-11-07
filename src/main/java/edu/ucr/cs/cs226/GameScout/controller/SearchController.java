@@ -32,14 +32,14 @@ public class SearchController {
     public List<Game> findGamesByGet(@RequestParam String keyword) {
         Map<String, String> t = new HashMap<String, String>();
         t.put("keyword",keyword);
-        return searchService.searchGame(t);
+        return searchService.searchGame(keyword);
     }
 
     // Handles POST requests to /api/games/search
     @PostMapping("/search")
     public List<Game> findGamesByPost(@RequestBody Map<String, String> body) {
 
-        return searchService.searchGame(body);
+        return searchService.searchGame(body.get("keyword"));
     }
 
     @PostMapping("/ranking")
