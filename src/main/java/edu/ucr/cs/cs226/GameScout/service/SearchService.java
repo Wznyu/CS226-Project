@@ -1,6 +1,7 @@
 package edu.ucr.cs.cs226.GameScout.service;
 
 import java.util.List;
+import java.util.Map;
 
 import edu.ucr.cs.cs226.GameScout.integration.SparkService;
 import org.jvnet.hk2.annotations.Service;
@@ -18,6 +19,10 @@ public class SearchService {
     }
 
     public List<Game> searchGame(String keyword){
-        return sparkService.findGamebyKeywords(keyword);
+        return sparkService.findGameByKeywords(keyword);
+    }
+
+    public List<Map<String, Object>> getRanking(String genre, String type){
+        return sparkService.getRanking(genre, type);
     }
 }

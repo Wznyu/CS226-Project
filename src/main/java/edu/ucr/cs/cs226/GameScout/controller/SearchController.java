@@ -1,5 +1,6 @@
 package edu.ucr.cs.cs226.GameScout.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,13 +30,24 @@ public class SearchController {
 
     @GetMapping("/search")
     public List<Game> findGamesByGet(@RequestParam String keyword) {
+        Map<String, String> t = new HashMap<String, String>();
+        t.put("keyword",keyword);
         return searchService.searchGame(keyword);
     }
 
     // Handles POST requests to /api/games/search
     @PostMapping("/search")
     public List<Game> findGamesByPost(@RequestBody Map<String, String> body) {
-        String keyword = body.get("keyword");
-        return searchService.searchGame(keyword);
+
+        return searchService.searchGame(body.get("keyword"));
     }
+
+    @PostMapping("/ranking")
+    public List<Map<String, Object>> getRankingByPost(@RequestBody Map<String, String> body) {
+        String genre = body.get("genre");
+        String type = body.get("type");
+        return searchService.getRanking(genre, type);
+    }
+
+
 }
