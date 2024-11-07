@@ -14,8 +14,6 @@
 <input type="text" id="keyword" placeholder="Enter a keyword" />
 <button onclick="searchGames('GET')">Search with GET</button>
 <button onclick="searchGames('POST')">Search with POST</button>
-<div id="results"></div>
-
 
 <h1>Ranking</h1>
 <label for="genre">Choose a genre:</label>
@@ -36,107 +34,55 @@
 
 <button onclick="ranking('GET')">Ranking with GET</button>
 <button onclick="ranking('POST')">Ranking with POST</button>
-<div id="ranking"></div>
 
 <script>
-        function searchGames(method) {
-            const keyword = document.getElementById('keyword').value;
-            const url = `/api/games/search?keyword=${encodeURIComponent(keyword)}`;
+    function searchGames(method) {
+        const keyword = document.getElementById('keyword').value;
 
-            if (method === 'GET') {
-                // Send a GET request
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => displayResults(data))
-                    .catch(error => console.error('Error with GET request:', error));
-            } else if (method === 'POST') {
-                // Send a POST request
-                fetch('/api/games/search', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ keyword: keyword })
+        if (method === 'GET') {
+            // Redirect to results.html with keyword as URL parameter
+            window.location.href = `results.html?keyword=${encodeURIComponent(keyword)}`;
+        } else if (method === 'POST') {
+            // Send POST request and store results in localStorage
+            fetch('/api/games/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ keyword: keyword })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    localStorage.setItem('searchResults', JSON.stringify(data));
+                    window.location.href = 'results.html';
                 })
-                    .then(response => response.json())
-                    .then(data => displayResults(data))
-                    .catch(error => console.error('Error with POST request:', error));
-            }
+                .catch(error => console.error('Error with POST request:', error));
         }
+    }
 
-        function displayResults(data) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = ''; // Clear previous results
+    function ranking(method) {
+        const genre = document.getElementById('genre').value;
+        const type = document.getElementById('type').value;
+        const url = `/api/games/ranking?genre=${encodeURIComponent(genre)}&type=${encodeURIComponent(type)}`;
 
-            if (data.length === 0) {
-                resultsDiv.innerHTML = '<p>No results found.</p>';
-                return;
-            }
-
-            data.forEach(game => {
-                const gameDiv = document.createElement('div');
-                gameDiv.className = 'result';
-                gameDiv.innerHTML = `
-                    <h3>${game.name}</h3>
-                    <p>Description: ${game.short_description}</p>
-                    <p>Release Date: ${game.release_date}</p>
-                    <p>Reviews: ${game.number_of_english_reviews}</p>
-                    <p>URL: ${game.link}</p>
-
-                `;
-                resultsDiv.appendChild(gameDiv);
-            });
+        if (method === 'GET') {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => displayRanking(data))
+                .catch(error => console.error('Error with GET request:', error));
+        } else if (method === 'POST') {
+            fetch('/api/games/ranking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ genre: genre, type: type })
+            })
+                .then(response => response.json())
+                .then(data => displayRanking(data))
+                .catch(error => console.error('Error with POST request:', error));
         }
-
-
-        function ranking(method) {
-            const genre = document.getElementById('genre').value;
-            const type = document.getElementById('type').value;
-            const url = `/api/games/ranking?genre=${encodeURIComponent(genre)}&type=${encodeURIComponent(type)}`;
-
-            if (method === 'GET') {
-                // Send a GET request
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => displayRanking(data))
-                    .catch(error => console.error('Error with GET request:', error));
-            } else if (method === 'POST') {
-                // Send a POST request
-                fetch('/api/games/ranking', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ genre: genre, type: type })
-                })
-                    .then(response => response.json())
-                    .then(data => displayRanking(data))
-                    .catch(error => console.error('Error with POST request:', error));
-            }
-        }
-
-        function displayRanking(data) {
-            const resultsDiv = document.getElementById('ranking');
-            resultsDiv.innerHTML = ''; // Clear previous results
-
-            if (data.length === 0) {
-                resultsDiv.innerHTML = '<p>No results found.</p>';
-                return;
-            }
-
-            data.forEach(game => {
-                const gameDiv = document.createElement('div');
-                gameDiv.className = 'ranking';
-                gameDiv.innerHTML = `
-                    <h3>${game.game_name}</h3>
-                    <p>genre: ${game.genre}</p>
-                    <p>type: ${game.rank_type}</p>
-                    <p>rank: ${game.rank}</p>
-
-                `;
-                resultsDiv.appendChild(gameDiv);
-            });
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
