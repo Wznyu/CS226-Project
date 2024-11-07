@@ -42,6 +42,12 @@ public class SearchController {
         return searchService.searchGame(body.get("keyword"));
     }
 
+
+    @GetMapping("/ranking")
+    public List<Map<String, Object>> rankingByGet(@RequestParam String genre, @RequestParam String type) {
+        return searchService.getRanking(genre, type);
+    }
+
     @PostMapping("/ranking")
     public List<Map<String, Object>> getRankingByPost(@RequestBody Map<String, String> body) {
         String genre = body.get("genre");
