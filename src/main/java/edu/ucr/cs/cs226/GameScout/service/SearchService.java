@@ -18,10 +18,11 @@ public class SearchService {
         this.sparkService = sparkService;
     }
 
-    public List<Game> searchGame(Map<String, String> body){
-        String keyword = body.get("keyword");
-//        String genre = body.get("genre");
-//        String input = body.get("input");
-        return sparkService.findGamebyKeywords(keyword);
+    public List<Game> searchGame(String keyword){
+        return sparkService.findGameByKeywords(keyword);
+    }
+
+    public List<Map<String, Object>> getRanking(String genre, String type){
+        return sparkService.getRanking(genre, type);
     }
 }
