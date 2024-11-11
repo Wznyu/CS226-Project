@@ -34,7 +34,7 @@
 
 <button onclick="ranking('GET')">Ranking with GET</button>
 <button onclick="ranking('POST')">Ranking with POST</button>
-
+<div id="results"></div>
 <script>
     function searchGames(method) {
         const keyword = document.getElementById('keyword').value;
@@ -82,6 +82,29 @@
                 .then(data => displayRanking(data))
                 .catch(error => console.error('Error with POST request:', error));
         }
+    }
+
+        function displayRanking(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ''; // Clear previous results
+
+            if (data.length === 0) {
+                resultsDiv.innerHTML = '<p>No results found.</p>';
+                return;
+            }
+
+            data.forEach(game => {
+                const gameDiv = document.createElement('div');
+                gameDiv.className = 'ranking';
+                gameDiv.innerHTML = `
+                    <h3>${game.game_name}</h3>
+                    <p>genre: ${game.genre}</p>
+                    <p>type: ${game.rank_type}</p>
+                    <p>rank: ${game.rank}</p>
+
+                `;
+                resultsDiv.appendChild(gameDiv);
+            });
     }
 </script>
 </body>
