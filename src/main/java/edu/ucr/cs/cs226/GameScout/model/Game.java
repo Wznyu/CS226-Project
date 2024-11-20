@@ -3,13 +3,57 @@ package edu.ucr.cs.cs226.GameScout.model;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 public class Game {
+    private String number_of_reviews_from_purchased_people;
+    private String overall_player_rating;
+    private String publisher;
+    private String developer;
+    private String genres;
     private String name;
     private String short_description;
     private String release_date;
     private String number_of_english_reviews;
     private String link;
-
     private String imgSrc;
+
+    public String getNumber_of_reviews_from_purchased_people() {
+        return number_of_reviews_from_purchased_people;
+    }
+
+    public void setNumber_of_reviews_from_purchased_people(String number_of_reviews_from_purchased_people) {
+        this.number_of_reviews_from_purchased_people = number_of_reviews_from_purchased_people;
+    }
+
+    public String getOverall_player_rating() {
+        return overall_player_rating;
+    }
+
+    public void setOverall_player_rating(String overall_player_rating) {
+        this.overall_player_rating = overall_player_rating;
+    }
+
+    public String getDeveloper() {
+        return developer;
+    }
+
+    public void setDeveloper(String developer) {
+        this.developer = developer;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public String getGenres() {
+        return genres;
+    }
+
+    public void setGenres(String genres) {
+        this.genres = genres;
+    }
 
     public String getName() {
         return name;
@@ -26,6 +70,7 @@ public class Game {
     public void setShort_description(String short_description) {
         this.short_description = short_description;
     }
+
 
     public String getRelease_date() {
         return release_date;

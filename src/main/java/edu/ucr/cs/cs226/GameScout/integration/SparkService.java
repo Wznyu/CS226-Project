@@ -70,8 +70,15 @@ public class SparkService {
     }
 
     public List<Game> findGameByKeywords(String keyword) {
-        Dataset<Row> filtered = gameDescriptions.filter(col("short_description").contains(keyword));
-        return filtered.as(Encoders.bean(Game.class)).collectAsList();
+        gameDescriptions.createOrReplaceTempView("rankings");
+
+        String sqlQuery = String.format(
+                "SELECT * FROM rankings WHERE short_description LIKE '%%%s%%'", keyword
+        );
+
+        Dataset<Row> df = sparkSession.sql(sqlQuery);
+        df.show();
+        return df.as(Encoders.bean(Game.class)).collectAsList();
     }
 
     public List<Map<String, Object>> getRanking(String genre, String type) {
@@ -80,7 +87,7 @@ public class SparkService {
 
 
         String sqlQuery = String.format(
-                "SELECT * FROM ranking WHERE rank BETWEEN 1 AND 10 AND genre = '%s' AND rank_type = '%s'",
+                "SELECT * FROM ranking WHERE rank BETWEEN 1 AND 16 AND genre = '%s' AND rank_type = '%s'",
                 genre, type
         );
 

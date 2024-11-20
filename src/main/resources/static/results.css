@@ -1,0 +1,85 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: url('https://images.unsplash.com/photo-1516676839530-135a545cce02?q=80&w=3173&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center fixed;
+    background-size: cover;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#results {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    gap: 20px;
+}
+
+.result {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-color: #000000;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    text-color: #000000;
+    background: url('https://images.unsplash.com/photo-1516676839530-135a545cce02?q=80&w=3173&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center fixed;
+    background-size: cover;
+    height: 600px; /* Set a fixed height for the block */
+}
+
+.result h3 {
+    margin: 0;
+    padding: 0 0 18px;
+    font-size: 1.5rem;
+    color: #333;
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis for long titles */
+    line-height: 1.2; /* Adjust line height for proper spacing */
+}
+
+.result p {
+    margin: 15px 0; /* Add consistent spacing between paragraphs */
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5; /* Increase line-height for readability */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.result img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-top: 10px;
+    flex-shrink: 0;
+}
+
+.result-content {
+    flex-grow: 1; /* Allow content to take available space */
+    overflow-y: auto; /* Enable scrolling for overflowing content */
+}
+
+.result a {
+    color: #007BFF;
+    text-decoration: none;
+    word-wrap: break-word; /* Break long links */
+}
+
+.result a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Design for smaller screens */
+@media (max-width: 768px) {
+    #results {
+        grid-template-columns: 1fr; /* Single column for small screens */
+    }
+}
