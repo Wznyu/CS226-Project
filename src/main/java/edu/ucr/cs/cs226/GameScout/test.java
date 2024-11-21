@@ -52,7 +52,7 @@ public class test {
             String sqlQuery = "SELECT review, recommendation FROM reviews";
 
 //            Dataset<Row> df = sparkSession.sql(sqlQuery);
-            Dataset<Row> df = sparkSession.sql(sqlQuery).limit(50000);  // Limit rows to 1000 for testing
+            Dataset<Row> df = sparkSession.sql(sqlQuery).limit(1000);  // Limit rows to 1000 for testing
 
             df = df.filter(df.col("review").isNotNull());  // Or use .coalesce() if necessary
 
@@ -94,7 +94,7 @@ public class test {
                     .setStages(new PipelineStage[] {regexTokenizer, hashingTF, stringIndexer, lsvc});
 
             ParamMap[] paramGrid = new ParamGridBuilder()
-                    .addGrid(hashingTF.numFeatures(), new int[] {100, 200})
+                    .addGrid(hashingTF.numFeatures(), new int[] {1024, 2048, 4096})
                     .addGrid(lsvc.fitIntercept())
                     .addGrid(lsvc.regParam(), new double[] {0.01, 0.0001})
                     .addGrid(lsvc.maxIter(), new int[] {10, 15})
