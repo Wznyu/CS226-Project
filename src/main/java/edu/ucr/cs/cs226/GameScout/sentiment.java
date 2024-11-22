@@ -20,8 +20,7 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.ml.feature.IDF;
 import java.util.Arrays;
 
-
-public class test {
+public class sentiment {
     public static void main(String[] args) {
         SparkSession sparkSession = SparkSession.builder()
                 .appName("GameReviewSentimentAnalysis")
@@ -33,7 +32,6 @@ public class test {
                 .getOrCreate();
 
         // Set the logging level
-//        sparkSession.sparkContext().setLogLevel("ERROR");
         sparkSession.sparkContext().setLogLevel("ERROR");
 
 
@@ -44,7 +42,8 @@ public class test {
                 .option("multiline", "true")
                 .option("inferSchema", "true")
                 .option("header", "true")
-                .csv("src/main/resources/data/steam_game_reviews.csv");
+                .parquet("src/main/resources/data/filtered_reviews");
+
         long t1 = System.nanoTime();
 
         try {
@@ -54,7 +53,7 @@ public class test {
             String sqlQuery = "SELECT review, recommendation FROM reviews";
 
 //            Dataset<Row> df = sparkSession.sql(sqlQuery);
-            Dataset<Row> df = sparkSession.sql(sqlQuery).limit(1000);  // Limit rows to 1000 for testing
+            Dataset<Row> df = sparkSession.sql(sqlQuery).limit(5000);  // Limit rows to 1000 for testing
 
             df = df.filter(df.col("review").isNotNull());  // Or use .coalesce() if necessary
 
@@ -73,37 +72,23 @@ public class test {
             // TF
             HashingTF hashingTF = new HashingTF()
                     .setInputCol("words")
-                    .setOutputCol("rawFeatures");
-
-            // IDF
-            IDF idf = new IDF()
-                    .setInputCol("rawFeatures")
                     .setOutputCol("features");
+
+//            // IDF
+//            IDF idf = new IDF()
+//                    .setInputCol("rawFeatures")
+//                    .setOutputCol("features");
 
             StringIndexer stringIndexer = new StringIndexer()
                     .setInputCol("recommendation")
                     .setOutputCol("label");
 
-//            Dataset<Row> tokenizedData = regexTokenizer.transform(df);
-//            tokenizedData.show(5, false);
-//
-//            Dataset<Row> w = remover.transform(tokenizedData);
-//
-//            w.show(5);
-//            w.printSchema();
-
-//            Dataset<Row> featuredData = hashingTF.transform(tokenizedData);
-//            featuredData.show(5);
-//            featuredData.printSchema();
-//
-//            Dataset<Row> indexedData = stringIndexer.fit(featuredData).transform(featuredData);
-//            indexedData.show(5);
 
 
             LinearSVC lsvc = new LinearSVC();
 
             Pipeline pipeline = new Pipeline()
-                    .setStages(new PipelineStage[] {regexTokenizer, remover, hashingTF, idf, stringIndexer, lsvc});
+                    .setStages(new PipelineStage[] {regexTokenizer, remover, hashingTF, stringIndexer, lsvc});
 
             System.out.println(Arrays.toString(pipeline.getStages()));
             ParamMap[] paramGrid = new ParamGridBuilder()
@@ -134,6 +119,10 @@ public class test {
             // Run train validation split, and choose the best set of parameters.
             TrainValidationSplitModel model = trainValidationSplit.fit(trainingData);
 
+
+            // Save model
+            model.save("src/main/resources/models/sentiment_model");
+
             // Assuming model is defined and has a bestModel method returning a PipelineModel
             PipelineModel bestModel = (PipelineModel) model.bestModel();
 
@@ -142,7 +131,7 @@ public class test {
             int numFeatures = htf.getNumFeatures();
 
             // Extract parameters from LinearSVCModel (assumed to be the fourth stage in the pipeline)
-            LinearSVCModel linearSVCModel = (LinearSVCModel) bestModel.stages()[5];
+            LinearSVCModel linearSVCModel = (LinearSVCModel) bestModel.stages()[4];
             boolean fitIntercept = linearSVCModel.getFitIntercept();
             double regParam = linearSVCModel.getRegParam();
             int maxIter = linearSVCModel.getMaxIter();
@@ -161,7 +150,7 @@ public class test {
 
             // test
             predictions.printSchema();
-            predictions.show(5);
+            predictions.show(5,false);
 
             predictions.select("review", "recommendation", "label", "prediction").show();
 
