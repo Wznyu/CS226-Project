@@ -15,6 +15,8 @@ SID: 862372351
 Stephen Huang: xhuan186@ucr.edu 
 SID: 862372587
 
+# Compile and run 
+
 
 
 
