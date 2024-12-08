@@ -15,6 +15,7 @@ public class Game {
     private String link;
     private String imgSrc;
 
+
     public String getNumber_of_reviews_from_purchased_people() {
         return number_of_reviews_from_purchased_people;
     }

@@ -17,10 +17,11 @@ import org.apache.spark.ml.tuning.TrainValidationSplitModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.ml.feature.IDF;
+import org.apache.spark.sql.functions;
+
 import java.util.Arrays;
 
-public class sentiment {
+public class Sentiment {
     public static void main(String[] args) {
         SparkSession sparkSession = SparkSession.builder()
                 .appName("GameReviewSentimentAnalysis")
@@ -60,6 +61,9 @@ public class sentiment {
             df.show(5);
             //        Tokenizer tokenizer = new Tokenizer().setInputCol("review").setOutputCol("words");
 
+            df.groupBy("recommendation").count().show();
+
+
             RegexTokenizer regexTokenizer = new RegexTokenizer()
                     .setInputCol("review")
                     .setOutputCol("raw")
@@ -86,6 +90,13 @@ public class sentiment {
 
 
             LinearSVC lsvc = new LinearSVC();
+            lsvc.setWeightCol("classWeight");
+
+            Dataset<Row> weightedData = df.withColumn("classWeight",
+                    functions.when(df.col("recommendation").equalTo("Recommended"), 0.1)
+                            .otherwise(0.9));
+
+
 
             Pipeline pipeline = new Pipeline()
                     .setStages(new PipelineStage[] {regexTokenizer, remover, hashingTF, stringIndexer, lsvc});
@@ -109,7 +120,7 @@ public class sentiment {
                     .setTrainRatio(0.8)  // 80% for training and the remaining 20% for validation
                     .setParallelism(2);  // Evaluate up to 2 parameter settings in parallel
 
-            Dataset<Row>[] splits = df.randomSplit(new double[] {0.8, 0.2});
+            Dataset<Row>[] splits = weightedData.randomSplit(new double[] {0.8, 0.2});
             Dataset<Row> trainingData = splits[0];
             Dataset<Row> testData = splits[1];
 
@@ -121,7 +132,7 @@ public class sentiment {
 
 
             // Save model
-            model.save("src/main/resources/models/sentiment_model");
+            model.write().overwrite().save("src/main/resources/models/sentiment_model");
 
             // Assuming model is defined and has a bestModel method returning a PipelineModel
             PipelineModel bestModel = (PipelineModel) model.bestModel();
@@ -163,10 +174,10 @@ public class sentiment {
 
             // Measure and print the elapsed time
             long t2 = System.nanoTime();
-            System.out.printf("Applied sentiment analysis algorithm on input game_reviews in %.2f seconds%n", (t2 - t1) * 1E-9);
+            System.out.printf("Applied Sentiment analysis algorithm on input game_reviews in %.2f seconds%n", (t2 - t1) * 1E-9);
 
         } catch (Exception e) {
-            System.err.println("Error during sentiment analysis: " + e.getMessage());
+            System.err.println("Error during Sentiment analysis: " + e.getMessage());
         } finally {
             sparkSession.stop();
         }

@@ -2,6 +2,7 @@ package edu.ucr.cs.cs226.GameScout.configuration;
 
 import edu.ucr.cs.cs226.GameScout.integration.SparkService;
 import edu.ucr.cs.cs226.GameScout.service.SearchService;
+import edu.ucr.cs.cs226.GameScout.service.SentimentService;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
@@ -35,5 +36,10 @@ public class SparkConfig {
     @Bean
     public SearchService searchService(SparkService sparkService) {
         return new SearchService(sparkService); // If there are dependencies, pass them here
+    }
+
+    @Bean
+    public SentimentService sentimentService(SparkService sparkService) {
+        return new SentimentService(sparkService); // If there are dependencies, pass them here
     }
 }

@@ -174,10 +174,10 @@ public class test {
 
             // Measure and print the elapsed time
             long t2 = System.nanoTime();
-            System.out.printf("Applied sentiment analysis algorithm on input game_reviews in %.2f seconds%n", (t2 - t1) * 1E-9);
+            System.out.printf("Applied Sentiment analysis algorithm on input game_reviews in %.2f seconds%n", (t2 - t1) * 1E-9);
 
         } catch (Exception e) {
-            System.err.println("Error during sentiment analysis: " + e.getMessage());
+            System.err.println("Error during Sentiment analysis: " + e.getMessage());
         } finally {
             sparkSession.stop();
         }
