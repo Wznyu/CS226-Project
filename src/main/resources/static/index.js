@@ -49,7 +49,7 @@ function sentiment() {
     const url = `/api/games/sentiment?review=${encodeURIComponent(review)}&recommendation=${encodeURIComponent(recommendation)}`;
     fetch(url)
         .then(response => response.json())
-        .then(data => displaySentiment(data))
+        .then(data => {console.log(data);displaySentiment(data)})
         .catch(error => console.error('Error with GET request:', error));
 
 }
@@ -62,8 +62,8 @@ function displaySentiment(data) {
         outputDiv.innerHTML = '<p>No results found.</p>';
         return;
     }
-
-//    outputDiv.textContent = data.recommendation;
+    console.log(data)
+    outputDiv.textContent = 'Prediction: '+ data.recommendation;
 
 
 }

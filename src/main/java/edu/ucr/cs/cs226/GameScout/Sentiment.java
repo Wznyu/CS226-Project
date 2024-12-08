@@ -54,7 +54,7 @@ public class Sentiment {
             String sqlQuery = "SELECT review, recommendation FROM reviews";
 
 //            Dataset<Row> df = sparkSession.sql(sqlQuery);
-            Dataset<Row> df = sparkSession.sql(sqlQuery).limit(5000);  // Limit rows to 1000 for testing
+            Dataset<Row> df = sparkSession.sql(sqlQuery);  // Limit rows to 1000 for testing
 
             df = df.filter(df.col("review").isNotNull());  // Or use .coalesce() if necessary
 
@@ -93,8 +93,8 @@ public class Sentiment {
             lsvc.setWeightCol("classWeight");
 
             Dataset<Row> weightedData = df.withColumn("classWeight",
-                    functions.when(df.col("recommendation").equalTo("Recommended"), 0.1)
-                            .otherwise(0.9));
+                    functions.when(df.col("recommendation").equalTo("Recommended"), 0.15)
+                            .otherwise(0.85));
 
 
 
@@ -175,6 +175,36 @@ public class Sentiment {
             // Measure and print the elapsed time
             long t2 = System.nanoTime();
             System.out.printf("Applied Sentiment analysis algorithm on input game_reviews in %.2f seconds%n", (t2 - t1) * 1E-9);
+
+            // Add columns for TP, FP, FN
+            Dataset<Row> metrics = predictions
+                    .withColumn("TP", functions.when(predictions.col("label").equalTo(1.0)
+                            .and(predictions.col("prediction").equalTo(1.0)), 1).otherwise(0))
+                    .withColumn("FP", functions.when(predictions.col("label").equalTo(0.0)
+                            .and(predictions.col("prediction").equalTo(1.0)), 1).otherwise(0))
+                    .withColumn("FN", functions.when(predictions.col("label").equalTo(1.0)
+                            .and(predictions.col("prediction").equalTo(0.0)), 1).otherwise(0));
+
+            // Sum the metrics
+            Row totals = metrics.select(
+                    functions.sum("TP").alias("TP"),
+                    functions.sum("FP").alias("FP"),
+                    functions.sum("FN").alias("FN")
+            ).collectAsList().get(0);
+
+            long TP = totals.getAs("TP");
+            long FP = totals.getAs("FP");
+            long FN = totals.getAs("FN");
+
+            // Calculate precision, recall, and F1-score
+            double precision = TP / (double) (TP + FP);
+            double recall = TP / (double) (TP + FN);
+            double f1 = 2 * ((precision * recall) / (precision + recall));
+
+            // Print results
+            System.out.printf("Precision: %.2f%n", precision);
+            System.out.printf("Recall: %.2f%n", recall);
+            System.out.printf("F1 Score: %.2f%n", f1);
 
         } catch (Exception e) {
             System.err.println("Error during Sentiment analysis: " + e.getMessage());
