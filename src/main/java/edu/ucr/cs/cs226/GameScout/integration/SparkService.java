@@ -69,13 +69,29 @@ public class SparkService {
 //        sentiment();
     }
 
+    public String appendSQuery(String tableName, List<String> columns, String keyword){
+        StringBuilder sqlQuery = new StringBuilder("SELECT * FROM ");
+        sqlQuery.append(tableName).append(" WHERE ");
+
+        // Append the LIKE conditions for each column
+        for (int i = 0; i < columns.size(); i++) {
+            sqlQuery.append(columns.get(i))
+                    .append(String.format(" LIKE '%%%s%%'",keyword));
+
+            if (i < columns.size() - 1) {
+                sqlQuery.append(" OR ");
+            }
+        }
+
+        return sqlQuery.toString();
+    }
+
     public List<Game> findGameByKeywords(String keyword) {
         gameDescriptions.createOrReplaceTempView("rankings");
 
-        String sqlQuery = String.format(
-                "SELECT * FROM rankings WHERE short_description LIKE '%%%s%%'", keyword
-        );
-
+        List<String> columns = List.of("name", "short_description", "long_description","genres","developer","publisher");
+        String sqlQuery = appendSQuery("rankings",columns, keyword);
+        System.out.println(sqlQuery);
         Dataset<Row> df = sparkSession.sql(sqlQuery);
         df.show();
         return df.as(Encoders.bean(Game.class)).collectAsList();
