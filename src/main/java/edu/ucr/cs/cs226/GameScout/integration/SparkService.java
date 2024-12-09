@@ -1,6 +1,7 @@
 package edu.ucr.cs.cs226.GameScout.integration;
 
 import edu.ucr.cs.cs226.GameScout.model.Game;
+import org.apache.hadoop.shaded.org.eclipse.jetty.websocket.common.frames.DataFrame;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
@@ -12,13 +13,17 @@ import org.apache.spark.ml.param.ParamMap;
 import org.apache.spark.ml.tuning.ParamGridBuilder;
 import org.apache.spark.ml.tuning.TrainValidationSplit;
 import org.apache.spark.ml.tuning.TrainValidationSplitModel;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoders;
-import org.apache.spark.sql.Row;
+import org.apache.spark.sql.*;
+
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.grouping;
 
-import org.apache.spark.sql.SparkSession;
+import static org.apache.spark.sql.functions.to_date;
+import static org.apache.spark.sql.functions.when;
+import static org.apache.spark.sql.functions.concat;
+import static org.apache.spark.sql.functions.lit;
+
+
 import org.jvnet.hk2.annotations.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,7 +37,9 @@ public class SparkService {
     private Dataset<Row> gameDescriptions;
 
     private Dataset<Row> gameRanking;
-//    private Dataset<Row> gameReviews;
+    private Dataset<Row> gameReviews;
+
+    //    private Dataset<Row> gameReviews;
 //    @Autowired
 //    private JavaSparkContext sparkContext;
 
@@ -58,14 +65,14 @@ public class SparkService {
                 .option("header", "true")
                 .csv("src/main/resources/data/games_ranking.csv");
 
-//        gameReviews = sparkSession.read()
-//                .option("sep", ",")
-//                .option("quote", "\"")
-//                .option("escape", "\"")
-//                .option("multiline", "true")
-//                .option("inferSchema", "true")
-//                .option("header", "true")
-//                .csv("src/main/resources/data/steam_game_reviews.csv");
+        gameReviews = sparkSession.read()
+                .option("sep", ",")
+                .option("quote", "\"")
+                .option("escape", "\"")
+                .option("multiline", "true")
+                .option("inferSchema", "true")
+                .option("header", "true")
+                .csv("src/main/resources/data/steam_game_reviews.csv");
 //        sentiment();
     }
 
@@ -123,6 +130,106 @@ public class SparkService {
                 .collect(Collectors.toList());
     }
 
+    public List<Map<String, Object>> getPopular(String start, String end){
+        gameReviews.createOrReplaceTempView("abc");
+
+        // 3. Select date and name columns
+
+        Dataset<Row> selectedDF = sparkSession.sql("SELECT * FROM abc");
+//        Dataset<Row> selectedDF = sparkSession.sql("SELECT date, game_name FROM abc");
+
+//        selectedDF.show(20);
+//        selectedDF = selectedDF.withColumn("date",
+////                functions.when(functions.to_date(col("date"), "d MMMM").isNotNull(),
+////                                functions.to_date(functions.concat(col("date"), functions.lit(" 2024")), "d MMMM yyyy"))
+////                        .when(functions.to_date(col("date"), "MMMM d").isNotNull(),
+////                                functions.to_date(functions.concat(col("date"), functions.lit(" 2024")), "MMMM d yyyy"))
+////                        .when(functions.to_date(col("date"), "MMMM d, yyyy").isNotNull(),
+////                                functions.date_format(functions.to_date(col("date"), "MMMM d, yyyy"), "d MM yyyy"))
+////                        .otherwise(col("date"))
+////        );
+//
+//        selectedDF.show(20);
+//        selectedDF = selectedDF.withColumn("date",
+//                functions.when(functions.to_date(col("date"), "yyyy MM dd").isNotNull(),
+//                                functions.to_date(col("date"), "d MM yyyy"))
+//                        .when(functions.to_date(col("date"), "MMMM d yyyy").isNotNull(),
+//                                functions.to_date(col("date"), "d MM yyyy"))
+//                        .when(functions.to_date(col("date"), "MMMM d, yyyy").isNotNull(),
+//                                functions.to_date(col("date"), "d MM yyyy"))
+//                        .otherwise(col("date"))
+//        );
+//
+//
+//        selectedDF.show(20);
+//        selectedDF = selectedDF.filter(col("date").isNotNull());
+
+//        selectedDF = selectedDF.withColumn("date",
+//                functions.when(functions.to_date(col("date"), "MMMM d, yyyy").isNotNull(),
+//                                functions.date_format(functions.to_date(col("date"), "MMMM d, yyyy"), "MM d yyyy"))
+//                        .otherwise(col("date"))
+//        );
+        Dataset<Row> result = sparkSession.sql("SELECT game_name, COUNT(*) AS count FROM abc WHERE date >= '" + start + "' AND date <= '" + end + "' GROUP BY game_name ORDER BY count DESC");
+
+
+        result.show();
+        return result.collectAsList().stream()
+                .map(row -> {
+                    // Convert each row to a map
+                    Map<String, Object> map = new java.util.HashMap<>();
+                    for (String field : row.schema().fieldNames()) {
+                        map.put(field, row.getAs(field));
+                    }
+                    return map;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public static String convertMonth(String month) {
+        String monthName;
+        switch (month) {
+            case "01":
+                monthName = "January";
+                break;
+            case "02":
+                monthName = "February";
+                break;
+            case "03":
+                monthName = "March";
+                break;
+            case "04":
+                monthName = "April";
+                break;
+            case "05":
+                monthName = "May";
+                break;
+            case "06":
+                monthName = "June";
+                break;
+            case "07":
+                monthName = "July";
+                break;
+            case "08":
+                monthName = "August";
+                break;
+            case "09":
+                monthName = "September";
+                break;
+            case "10":
+                monthName = "October";
+                break;
+            case "11":
+                monthName = "November";
+                break;
+            case "12":
+                monthName = "December";
+                break;
+            default:
+                monthName = "Invalid month";
+                break;
+        }
+        return monthName;
+    }
 //    public void sentiment(){
 //
 //        long t1 = System.nanoTime();

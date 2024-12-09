@@ -55,5 +55,10 @@ public class SearchController {
         return searchService.getRanking(genre, type);
     }
 
+    @GetMapping("/popular")
+    public List<Map<String, Object>> popularByGet(@RequestParam String start, @RequestParam String end) {
+        return searchService.getPopular(start, end);
+    }
+
 
 }
