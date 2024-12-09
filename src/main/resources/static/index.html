@@ -33,6 +33,16 @@
 <button onclick="ranking('GET')">Search</button>
 <div id="results"></div>
 
+<h2>Sentiment</h2>
+<input type="text" id="review" placeholder="Enter a review" />
+<!--<input type="text" id="recommendation" placeholder="Enter recommendation" />-->
+<select name="recommendation" id="recommendation">
+    <option value="Recommended">Recommended</option>
+    <option value="Not Recommended">Not Recommended</option>
+</select>
+<button onclick="sentiment()">Predict</button>
+<div id="output"></div>
+
 <script src="index.js"></script> <!-- Link to JavaScript -->
 </body>
 </html>

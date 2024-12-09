@@ -15,7 +15,7 @@ function ranking(method) {
     if (method === 'GET') {
         fetch(url)
             .then(response => response.json())
-            .then(data => displayRanking(data))
+            .then(data => {console.log(data); displayRanking(data)} )
             .catch(error => console.error('Error with GET request:', error));
     }
 }
@@ -40,4 +40,30 @@ function displayRanking(data) {
         `;
         resultsDiv.appendChild(gameDiv);
     });
+}
+
+
+function sentiment() {
+    const review = document.getElementById('review').value;
+    const recommendation = document.getElementById('recommendation').value;
+    const url = `/api/games/sentiment?review=${encodeURIComponent(review)}&recommendation=${encodeURIComponent(recommendation)}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {console.log(data);displaySentiment(data)})
+        .catch(error => console.error('Error with GET request:', error));
+
+}
+
+function displaySentiment(data) {
+    const outputDiv = document.getElementById('output');
+    outputDiv.innerHTML = ''; // Clear previous results
+
+    if (data.length === 0) {
+        outputDiv.innerHTML = '<p>No results found.</p>';
+        return;
+    }
+    console.log(data)
+    outputDiv.textContent = 'Prediction: '+ data.recommendation;
+
+
 }

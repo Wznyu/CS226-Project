@@ -5,11 +5,12 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator;
+//import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.ml.tuning.TrainValidationSplitModel;
+import org.apache.spark.sql.functions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,11 @@ public class useModel {
         data.add(RowFactory.create("Too many microtransactions ruin the experience. It feels like a cash grab.", "Not Recommended"));
         data.add(RowFactory.create("The campaign mode was surprisingly deep and enjoyable. Highly recommended.", "Recommended"));
         data.add(RowFactory.create("The game is okay, but nothing special. You might enjoy it on sale.", "Not Recommended"));
-
+        data.add(RowFactory.create("The campaign mode was surprisingly deep and enjoyable. Highly recommended.", "Recommended"));
+        data.add(RowFactory.create("The game is okay, but nothing special. You might enjoy it on sale.", "Not Recommended"));
+        data.add(RowFactory.create("The game crashes all the time. Very disappointing", "Not Recommended"));
+//        data.add(RowFactory.create("Never cared much about Warhammer until this game showed me the error of my ways and made me cast away the heresy and fully embrace the Emperor's glorious light. No longer do I wander in the shadow of ignorance, for Space Marine 2 has torn asunder the veil that clouded my mortal sight.With each righteous strike of the chainsword, I felt the will of the Emperor coursing through my veins. The xenos or the heretic—none can stand before the might of the Adeptus Astartes, and now I, too, feel the weight of that sacred duty upon my shoulders. Every battle is a prayer to His undying majesty, every victory a testament to the purity of the Emperor's cause.In this game, I learned what it truly means to be a warrior of the Imperium: to purge the unclean without hesitation, to stand unwavering in the face of annihilation, and to know that failure is not an option, for failure would mean the death of mankind itself. This is no mere entertainment—this is an initiation into the sacred brotherhood of those who fight for the survival of the Imperium.Space Marine 2 is not just a game—it is a revelation, a holy writ in digital form, and a reminder that we must be ever vigilant, ever faithful, and ever ready to cleanse the galaxy of those who would defy the Emperor's will.Praise be to the God-Emperor! Burn the heretic, purge the unclean!", "Recommended"));
+//        data.add(RowFactory.create("The game itself is also super fun. The PvP and the campaign are a joy to play. Your actions feel deliberate, almost as if you're controlling an Angel in a 1 Ton metal suit. I love it.-------------------------------It's sad that I have to say this, but it's wonderfully refreshing to be able to boot up a game, play for an hour or two, and close it again. Rather than boot it up, do my dailies, check my weeklies, check my season pass etc.You boot the game up, and you play it. It doesn't try to open your wallet at any point.While this should not be something to be praised in the year 2024, it is refreshing to see.", "Recommended"));
         // Convert the data into a Dataset
         Dataset<Row> newReviews = sparkSession.createDataFrame(data, schema);
 
@@ -60,14 +65,26 @@ public class useModel {
         Dataset<Row> predictions = bestPipelineModel.transform(newReviews);
 
         // Display predictions
-        predictions.select("review", "recommendation", "prediction").show();
+        predictions.select("review", "recommendation", "prediction").show(false);
 
         // Evaluate (if ground truth is available)
-        BinaryClassificationEvaluator evaluator = new BinaryClassificationEvaluator()
-                .setLabelCol("label")
-                .setRawPredictionCol("prediction");
+//        BinaryClassificationEvaluator evaluator = new BinaryClassificationEvaluator()
+//                .setLabelCol("label")
+//                .setRawPredictionCol("prediction");
+//
+//        double accuracy = evaluator.evaluate(predictions);
 
-        double accuracy = evaluator.evaluate(predictions);
+        // Map "recommendation" to a numerical label
+        predictions = predictions.withColumn("label",
+                functions.when(functions.col("recommendation").equalTo("Recommended"), 0.0)
+                        .otherwise(1.0));
+
+        // Evaluate predictions
+        Dataset<Row> correctPredictions = predictions.filter(functions.col("prediction").equalTo(functions.col("label")));
+        long totalDataCount = predictions.count();
+        long correctCount = correctPredictions.count();
+
+        double accuracy = (double) correctCount / totalDataCount;
         System.out.println("Accuracy on new data: " + accuracy);
 
         sparkSession.stop();

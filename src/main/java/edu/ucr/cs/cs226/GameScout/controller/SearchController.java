@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import edu.ucr.cs.cs226.GameScout.model.Game;
-import edu.ucr.cs.cs226.GameScout.model.SearchRequest;
 import edu.ucr.cs.cs226.GameScout.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
