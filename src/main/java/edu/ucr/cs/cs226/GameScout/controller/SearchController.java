@@ -21,12 +21,6 @@ public class SearchController {
         this.searchService = searchService;
     }
 
-//    @PostMapping("/search")
-//    public List<Game> findGamesByPost(@RequestBody SearchRequest searchRequest){
-//        return searchService.searchGame(searchRequest.getKeyword());
-//    }
-
-
     @GetMapping("/search")
     public List<Game> findGamesByGet(@RequestParam String keyword) {
         Map<String, String> t = new HashMap<String, String>();
@@ -34,23 +28,9 @@ public class SearchController {
         return searchService.searchGame(keyword);
     }
 
-    // Handles POST requests to /api/games/search
-    @PostMapping("/search")
-    public List<Game> findGamesByPost(@RequestBody Map<String, String> body) {
-
-        return searchService.searchGame(body.get("keyword"));
-    }
-
 
     @GetMapping("/ranking")
     public List<Map<String, Object>> rankingByGet(@RequestParam String genre, @RequestParam String type) {
-        return searchService.getRanking(genre, type);
-    }
-
-    @PostMapping("/ranking")
-    public List<Map<String, Object>> getRankingByPost(@RequestBody Map<String, String> body) {
-        String genre = body.get("genre");
-        String type = body.get("type");
         return searchService.getRanking(genre, type);
     }
 

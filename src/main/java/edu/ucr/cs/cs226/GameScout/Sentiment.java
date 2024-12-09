@@ -53,13 +53,10 @@ public class Sentiment {
 
             String sqlQuery = "SELECT review, recommendation FROM reviews";
 
-//            Dataset<Row> df = sparkSession.sql(sqlQuery);
-            Dataset<Row> df = sparkSession.sql(sqlQuery);  // Limit rows to 1000 for testing
+            Dataset<Row> df = sparkSession.sql(sqlQuery);
 
-            df = df.filter(df.col("review").isNotNull());  // Or use .coalesce() if necessary
+            df = df.filter(df.col("review").isNotNull());
 
-            df.show(5);
-            //        Tokenizer tokenizer = new Tokenizer().setInputCol("review").setOutputCol("words");
 
             df.groupBy("recommendation").count().show();
 
@@ -67,7 +64,7 @@ public class Sentiment {
             RegexTokenizer regexTokenizer = new RegexTokenizer()
                     .setInputCol("review")
                     .setOutputCol("raw")
-                    .setPattern("\\W");  // alternatively .setPattern("\\w+").setGaps(false);
+                    .setPattern("\\W");
 
             StopWordsRemover remover = new StopWordsRemover()
                     .setInputCol("raw")
@@ -77,11 +74,6 @@ public class Sentiment {
             HashingTF hashingTF = new HashingTF()
                     .setInputCol("words")
                     .setOutputCol("features");
-
-//            // IDF
-//            IDF idf = new IDF()
-//                    .setInputCol("rawFeatures")
-//                    .setOutputCol("features");
 
             StringIndexer stringIndexer = new StringIndexer()
                     .setInputCol("recommendation")
@@ -111,14 +103,13 @@ public class Sentiment {
                     .addGrid(lsvc.threshold(), new double[] {0.0001, 0.01}) // Note: only the last threshold grid will be used
                     .build();
 
-            // In this case the estimator is simply the linear regression.
             // A TrainValidationSplit requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
             TrainValidationSplit trainValidationSplit = new TrainValidationSplit()
                     .setEstimator(pipeline)
                     .setEvaluator(new BinaryClassificationEvaluator())
                     .setEstimatorParamMaps(paramGrid)
-                    .setTrainRatio(0.8)  // 80% for training and the remaining 20% for validation
-                    .setParallelism(2);  // Evaluate up to 2 parameter settings in parallel
+                    .setTrainRatio(0.8)
+                    .setParallelism(2);
 
             Dataset<Row>[] splits = weightedData.randomSplit(new double[] {0.8, 0.2});
             Dataset<Row> trainingData = splits[0];
@@ -141,7 +132,7 @@ public class Sentiment {
             HashingTF htf = (HashingTF) bestModel.stages()[2];
             int numFeatures = htf.getNumFeatures();
 
-            // Extract parameters from LinearSVCModel (assumed to be the fourth stage in the pipeline)
+            // Extract parameters from LinearSVCModel
             LinearSVCModel linearSVCModel = (LinearSVCModel) bestModel.stages()[4];
             boolean fitIntercept = linearSVCModel.getFitIntercept();
             double regParam = linearSVCModel.getRegParam();

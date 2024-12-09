@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class dataPreparation {
+public class DataPreparation {
     public static void main(String[] args) {
         SparkSession sparkSession = SparkSession.builder()
                 .appName("GameReviewSentimentAnalysis")
@@ -20,8 +20,6 @@ public class dataPreparation {
                 .config("spark.sql.shuffle.partitions", "8")
                 .getOrCreate();
 
-        // Set the logging level
-//        sparkSession.sparkContext().setLogLevel("ERROR");
         sparkSession.sparkContext().setLogLevel("ERROR");
 
 
@@ -53,7 +51,6 @@ public class dataPreparation {
             contractions.put("I'm", "I am");
             contractions.put("you're", "you are");
             contractions.put("we're", "we are");
-            // Add more contractions as needed
             for (Map.Entry<String, String> entry : contractions.entrySet()) {
                 text = text.replaceAll("\\b" + entry.getKey() + "\\b", entry.getValue());
             }

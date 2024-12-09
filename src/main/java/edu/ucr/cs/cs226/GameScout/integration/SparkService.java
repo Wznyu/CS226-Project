@@ -23,9 +23,6 @@ public class SparkService {
     private Dataset<Row> gameRanking;
     private Dataset<Row> gameReviews;
 
-//    @Autowired
-//    private JavaSparkContext sparkContext;
-
     @Autowired
     public SparkService(SparkSession sparkSession) {
         this.sparkSession = sparkSession;
@@ -169,53 +166,9 @@ public class SparkService {
                 .collect(Collectors.toList());
     }
 
-    public static String convertMonth(String month) {
-        String monthName;
-        switch (month) {
-            case "01":
-                monthName = "January";
-                break;
-            case "02":
-                monthName = "February";
-                break;
-            case "03":
-                monthName = "March";
-                break;
-            case "04":
-                monthName = "April";
-                break;
-            case "05":
-                monthName = "May";
-                break;
-            case "06":
-                monthName = "June";
-                break;
-            case "07":
-                monthName = "July";
-                break;
-            case "08":
-                monthName = "August";
-                break;
-            case "09":
-                monthName = "September";
-                break;
-            case "10":
-                monthName = "October";
-                break;
-            case "11":
-                monthName = "November";
-                break;
-            case "12":
-                monthName = "December";
-                break;
-            default:
-                monthName = "Invalid month";
-                break;
-        }
-        return monthName;
-    }
 
     public String sentiment(String review, String recommendation) {
+
         TrainValidationSplitModel trainValidationSplitModel = TrainValidationSplitModel.load("src/main/resources/models/sentiment_model");
 
         // Extract the best PipelineModel
@@ -227,14 +180,12 @@ public class SparkService {
                 DataTypes.createStructField("recommendation", DataTypes.StringType, false)
         });
 
-        // Create data entries
+        // Create data
         List<Row> data = new ArrayList<>();
         data.add(RowFactory.create(review, recommendation));
 
-        // Convert the data into a Dataset
         Dataset<Row> newReviews = this.sparkSession.createDataFrame(data, schema);
 
-        // Filter out null reviews
         newReviews = newReviews.filter(newReviews.col("review").isNotNull());
 
         // Apply the model for predictions
@@ -253,11 +204,9 @@ public class SparkService {
 
         System.out.println("Accuracy on new data: " + accuracy);
 
-        // Extract the first prediction
         Row predictionRow = predictions.select("prediction").first();
         double prediction = predictionRow.getDouble(0); // Assuming "prediction" is a double column
 
-        // Return the prediction as a string
         return prediction == 0.0 ? "Recommended" : "Not Recommended";
     }
 }
